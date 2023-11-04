@@ -143,6 +143,8 @@ def solve_single_group(a1,b1,c1,a2,b2,c2,has_minimum, minimum, has_maximum, maxi
 # (b1, b2 > 0)
 # return: maximum_or_minimum, m, n_left, n_right
 def solve_single_group2(a1,b1,c1,a2,b2,c2,has_minimum, minimum, has_maximum, maximum, func):
+    if func == 0 and a1*b2 != a2*b1:
+        return 0, 0, 0, 0
     is_maximum_, m_val_, l_, r_ = solve_single_group(a1, b1, c1, a2, b2, c2, 0, 0, 0, 0)
     if is_maximum_ == 1 and has_minimum and m_val_ < minimum:
         print("no solution")
@@ -386,6 +388,9 @@ while s != 0:
                         minimum = value
                         minimum_n_valid = 1
                         minimum_n = l
+                j += 1
+            j = i + 1
+            while j < ineq_count:
                 if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
                     is_maximum, value, l, r = solve_single_group2(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2], has_minimum, minimum, has_maximum, maximum, 1)
                 if ineq_list[i][1] < 0 and ineq_list[j][1] > 0:
@@ -404,7 +409,9 @@ while s != 0:
                         minimum = value
                         minimum_n_valid = 1
                         minimum_n = l
-
+                j += 1
+            j = i + 1
+            while j < ineq_count:
                 if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
                     is_maximum, value, l, r = solve_single_group2(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2], has_minimum, minimum, has_maximum, maximum, 0)
                 if ineq_list[i][1] < 0 and ineq_list[j][1] > 0:
