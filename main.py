@@ -1,7 +1,7 @@
-has_maximum = 0
-has_minimum = 0
-maximum = 0
-minimum = 0
+def no_solution():
+    print("no solution")
+    exit()
+
 def div_up(a,b):
     value = a // b
     if b > 0:
@@ -28,250 +28,68 @@ def div_down(a,b):
         while value * b < a:
             value -= 1
     return value
-# b1*n >= a1*m + c1
-# b2*n <= a2*m + c2
-# (b1, b2 > 0)
-# return: maximum_or_minimum, m, n_left, n_right
-def solve_single_group(a1,b1,c1,a2,b2,c2,has_minimum, minimum, has_maximum, maximum):
-    if a1 == 0:
-        if a2 == 0:
-            l = div_up(c1,b1)
-            r = div_down(c2,b2)
-            if l > r:
-                print("no solution")
-                exit()
-            return 0, 0, 0, 0
-        else:
-            l = div_up(c1,b1)
-            m_val = b2 * l - c2
-            if a2 > 0:
-                m_val = div_up(m_val,a2)
-                is_maximum = -1
-            else:
-                m_val = div_down(m_val,a2)
-                is_maximum = 1
-            r = div_down((a2 * m_val + c2),b2)
-            return is_maximum, m_val, l, r
-    else:
-        if a2 == 0:
-            r = div_down(c2,b2)
-            m_val = b1 * r - c1
-            if a1 > 0:
-                m_val = div_down(m_val,a1)
-                is_maximum = 1
-            else:
-                m_val = div_up(m_val,a1)
-                is_maximum = -1
-            l = div_up((a1 * m_val + c1),b1)
-            return is_maximum, m_val, l, r
-        else:
-            coef = a1 * b2 - a2 * b1
-            constant = c1 * b2 - c2 * b1
-            if coef == 0:
-                if constant > 0:
-                    print("no solution")
-                    exit()
-                return 0, 0, 0, 0
-            if a1 > 0 and a2 < 0:
-                m_val = div_down(-constant,coef)
-                if has_maximum and m_val > maximum:
-                    m_val=maximum
-                if div_up((a1 * m_val + c1),b1) > div_down((a2 * m_val + c2),b2):
-                    n1 = div_up((a1 * m_val + c1),b1) -1
-                    n2 = div_down((a2 * m_val + c2),b2) + 1
-                    m_val1 = div_down((n1 * b1 - c1),a1)
-                    m_val2 = div_down((n2 * b2-c2),a2)
-                    if m_val1 > m_val2:
-                        m_val=m_val1
-                    else:
-                        m_val=m_val2
-                l = div_up((a1 * m_val + c1),b1)
-                r = div_down((a2 * m_val + c2),b2)
-                return 1, m_val, l, r
-            if a1 < 0 and a2 > 0:
-                m_val = div_up(-constant,coef)
-                if has_minimum and m_val < minimum:
-                    m_val=minimum
-                if div_up((a1 * m_val + c1),b1) > div_down((a2 * m_val + c2),b2):
-                    n1 = div_up((a1 * m_val + c1),b1) - 1
-                    n2 = div_down((a2 * m_val + c2),b2) + 1
-                    m_val1 = div_up((n1 * b1 - c1),a1)
-                    m_val2 = div_up((n2 * b2-c2),a2)
-                    if m_val1 < m_val2:
-                        m_val=m_val1
-                    else:
-                        m_val=m_val2
-                l = div_up((a1 * m_val + c1),b1)
-                r = div_down((a2 * m_val + c2),b2)
-                return -1, m_val, l, r
-            l_min = div_up((a1 * minimum + c1),b1)
-            r_min = div_down((a2 * minimum + c2),b2)
-            l_max = div_up((a1 * maximum + c1),b1)
-            r_max = div_down((a2 * maximum + c2),b2)
-            r_min2 = div_up((a2 * minimum + c2),b2)
-            l_max2 = div_down((a1 * maximum + c1),b1)
-            if a1 * b2 > a2 * b1:
-                if a1 >= b1 or a1 < 0:
-                    q = div_down(a1,b1)
-                    is_maximum, m_val, l_, r_ = solve_single_group(a1-q*b1, b1, c1, a2-q*b2, b2, c2, has_minimum, minimum, has_maximum, maximum)
-                else:
-                    is_maximum = 1
-                    if has_maximum:
-                        is_maximum_, m_val_, l_, r_ = solve_single_group(b2, a2, -c2, 0, 1, maximum, has_minimum, l_min, has_maximum, r_max)
-                        m_val = r_
-                    if has_maximum == 0 or m_val_ < l_max:
-                        is_maximum_, m_val_, l_, r_ = solve_single_group(b2, a2, -c2, b1, a1, -c1, has_minimum, l_min, has_maximum, l_max2)
-                        m_val = r_
-            else:
-                if a2 >= b2 or a2 < 0:
-                    q = div_down(a2,b2)
-                    is_maximum, m_val, l_, r_ = solve_single_group(a1-q*b1, b1, c1, a2-q*b2, b2, c2, has_minimum, minimum, has_maximum, maximum)
-                else:
-                    is_maximum = -1
-                    if has_minimum:
-                        is_maximum_, m_val_, l_, r_ = solve_single_group(0, 1, minimum, b1, a1, -c1, has_minimum, l_min, has_maximum, r_max)
-                        m_val = l_ 
-                    if has_minimum == 0 or m_val_ > r_min:
-                        is_maximum_, m_val_, l_, r_ = solve_single_group(b2, a2, -c2, b1, a1, -c1, has_minimum, r_min2, has_maximum, r_max)
-                        m_val = l_
-            l = div_up((a1 * m_val + c1),b1)
-            r = div_down((a2 * m_val + c2),b2)
-            return is_maximum, m_val, l, r
-        
-# b1*n >= a1*m + c1
-# b2*n <= a2*m + c2
-# (b1, b2 > 0)
-# return: maximum_or_minimum, m, n_left, n_right
-def solve_single_group2(a1,b1,c1,a2,b2,c2,has_minimum, minimum, has_maximum, maximum, func):
-    if func == 0 and a1*b2 != a2*b1:
-        return 0, 0, 0, 0
-    is_maximum_, m_val_, l_, r_ = solve_single_group(a1, b1, c1, a2, b2, c2, 0, 0, 0, 0)
-    if is_maximum_ == 1 and has_minimum and m_val_ < minimum:
-        print("no solution")
-        exit()
-    if is_maximum_ == -1 and has_maximum and m_val_ > maximum:
-        print("no solution")
-        exit()
-    if a1 == 0 and a2 == 0:
-        n1 = div_up(c1,b1)
-        n2 = div_down(c2,b2)
-        if n1 > n2:
-            print("no solution")
-            exit()
-        if func:
-            if has_minimum:
-                return -1, minimum, n1, n2
-            else:
-                return 0, 0, 0, 0
-        else:
-            if has_maximum:
-                return 1, maximum, n1, n2
-            else:
-                return 0, 0, 0, 0
+has_minimum=0
+has_maximum=0
+minimum=0
+maximum=0
+def set_minimum(value):
+    global minimum, has_minimum, maximum, has_maximum
+    if has_minimum == 0 or value > minimum:
+        has_minimum = 1
+        minimum = value
+        if has_minimum and has_maximum and minimum > maximum:
+            no_solution()
+def set_maximum(value):
+    global minimum, has_minimum, maximum, has_maximum
+    if has_maximum == 0 or value < maximum:
+        has_maximum = 1
+        maximum = value
+        if has_minimum and has_maximum and minimum > maximum:
+            no_solution()
 
-    if a1 > 0 and a2 <= 0:
-        if has_minimum:
-            is_maximum = -1
-            is_maximum_, m_val_, l_, r_ = solve_single_group(0, 1, minimum, b1, a1, -c1, 0, 0, 0, 0)
-            m_val = l_
-            l = div_up((a1 * m_val + c1),b1)
-            r = div_down((a2 * m_val + c2),b2)
-            return is_maximum, m_val, l, r
-        else:
-            return 0, 0, 0, 0
-    if a1 <= 0 and a2 > 0:
-        if has_maximum:
-            is_maximum = 1
-            is_maximum_, m_val_, l_, r_ = solve_single_group(b2, a2, -c2, 0, 1, maximum, 0, 0, 0, 0)
-            m_val = r_
-            l = div_up((a1 * m_val + c1),b1)
-            r = div_down((a2 * m_val + c2),b2)
-            return is_maximum, m_val, l, r
-        else:
-            return 0, 0, 0, 0
-    if a1 < 0 and a2 == 0:
-        if has_maximum:
-            is_maximum = 1
-            is_maximum_, m_val_, l_, r_ = solve_single_group(-b1, -a1, c1, 0, 1, maximum, 0, 0, 0, 0)
-            m_val = r_
-            l = div_up((a1 * m_val + c1),b1)
-            r = div_down((a2 * m_val + c2),b2)
-            return is_maximum, m_val, l, r
-        else:
-            return 0, 0, 0, 0
-    if a2 < 0 and a1 == 0:
-        if has_minimum:
-            is_maximum = -1
-            is_maximum_, m_val_, l_, r_ = solve_single_group(0, 1, minimum, -b2, -a2, c2, 0, 0, 0, 0)
-            m_val = l_
-            l = div_up((a1 * m_val + c1),b1)
-            r = div_down((a2 * m_val + c2),b2)
-            return is_maximum, m_val, l, r
-        else:
-            return 0, 0, 0, 0
-    l_min = div_up((a1 * minimum + c1),b1)
-    r_min = div_down((a2 * minimum + c2),b2)
-    l_max = div_up((a1 * maximum + c1),b1)
-    r_max = div_down((a2 * maximum + c2),b2)
-    r_min2 = div_up((a2 * minimum + c2),b2)
-    l_max2 = div_down((a1 * maximum + c1),b1)
-    if a1 * b2 == a2 * b1:
-        if a1 >= b1 or a1 < 0:
-            q = div_down(a1,b1)
-            is_maximum, m_val, l_, r_ = solve_single_group2(a1-q*b1, b1, c1, a2-q*b2, b2, c2, has_minimum, minimum, has_maximum, maximum, func)
-        else:
-            if func:
-                if has_minimum:
-                    is_maximum = -1
-                    is_maximum_, m_val_, l_, r_ = solve_single_group(0, 1, minimum, b1, a1, -c1, has_minimum, l_min, has_maximum, r_max)
-                    m_val = l_
-                    if m_val_ > r_min:
-                        is_maximum_, m_val_, l_, r_ = solve_single_group2(b2, a2, -c2, b1, a1, -c1, has_minimum, r_min2, has_maximum, r_max, func)
-                        m_val = l_
-                else:
-                    return 0, 0, 0, 0
-            else:
-                if has_maximum:
-                    is_maximum = 1
-                    is_maximum_, m_val_, l_, r_ = solve_single_group(b2, a2, -c2, 0, 1, maximum, has_minimum, l_min, has_maximum, r_max)
-                    m_val = r_
-                    if m_val_ < l_max:
-                        is_maximum_, m_val_, l_, r_ = solve_single_group2(b2, a2, -c2, b1, a1, -c1, has_minimum, l_min, has_maximum, l_max2, func)
-                        m_val = r_
-                else:
-                    return 0, 0, 0, 0
-                
+# b1*n >= a1*m + c1
+# b2*n <= a2*m + c2
+# b1, b2 are positive integers
+# return: new_value, l, r
+def update_minimum(a1,b1,c1,a2,b2,c2,value):
+    l = div_up(a1 * value + c1,b1)
+    r = div_down(a2 * value + c2,b2)
+    if l <= r:
+        return value, l, r
+    if a1 >= 0 and a2 <= 0:
+        no_solution()
+    if a1 <= 0 and a2 >= 0:
+        val1 = div_up(div_down(a1 * value + c1,b1) * b1 - c1,a1)
+        val2 = div_up(div_up(a2 * value + c2,b2) * b2 - c2,a2)
+        new_value = min(val1,val2)
+        l = div_up(a1 * new_value + c1,b1)
+        r = div_down(a2 * new_value + c2,b2)
+        return new_value, l, r
     if a1 * b2 > a2 * b1:
-        if has_minimum:
-            if a1 >= b1 or a1 < 0:
-                q = div_down(a1,b1)
-                is_maximum, m_val, l_, r_ = solve_single_group2(a1-q*b1, b1, c1, a2-q*b2, b2, c2, has_minimum, minimum, has_maximum, maximum, func)
-            else:
-                is_maximum = -1
-                is_maximum_, m_val_, l_, r_ = solve_single_group(0, 1, minimum, b1, a1, -c1, has_minimum, l_min, has_maximum, r_max)
-                m_val = l_
-                if m_val_ > r_min:
-                    is_maximum_, m_val_, l_, r_ = solve_single_group2(b2, a2, -c2, b1, a1, -c1, has_minimum, r_min2, has_maximum, r_max, func)
-                    m_val = l_
-        else:
-            return 0, 0, 0, 0
-    if a1 * b2 < a2 * b1:
-        if has_maximum:
-            if a2 >= b2 or a2 < 0:
-                q = div_down(a2,b2)
-                is_maximum, m_val, l_, r_ = solve_single_group2(a1-q*b1, b1, c1, a2-q*b2, b2, c2, has_minimum, minimum, has_maximum, maximum, func)
-            else:
-                is_maximum = 1
-                is_maximum_, m_val_, l_, r_ = solve_single_group(b2, a2, -c2, 0, 1, maximum, has_minimum, l_min, has_maximum, r_max)
-                m_val = r_
-                if m_val_ < l_max:
-                    is_maximum_, m_val_, l_, r_ = solve_single_group2(b2, a2, -c2, b1, a1, -c1, has_minimum, l_min, has_maximum, l_max2, func)
-                    m_val = r_
-        else:
-            return 0, 0, 0, 0
-    l = div_up((a1 * m_val + c1),b1)
-    r = div_down((a2 * m_val + c2),b2)
-    return is_maximum, m_val, l, r
+        if a1 < 0 or a1 >= b1:
+            q = div_down(a1,b1)
+            new_value, l1, r1 = update_minimum(a1-q*b1,b1,c1,a2-q*b2,b2,c2, value)
+            l = div_up(a1 * new_value + c1,b1)
+            r = div_down(a2 * new_value + c2,b2)
+            return new_value, l, r
+    else:
+        if a2 < 0 or a2 >= b2:
+            q = div_down(a2,b2)
+            new_value, l1, r1 = update_minimum(a1-q*b1,b1,c1,a2-q*b2,b2,c2, value)
+            l = div_up(a1 * new_value + c1,b1)
+            r = div_down(a2 * new_value + c2,b2)
+            return new_value, l, r
+    val1, new_value, r1 = update_minimum(b2, a2, -c2, b1, a1, -c1, div_up(a2 * value + c2, b2))
+    l = div_up(a1 * new_value + c1,b1)
+    r = div_down(a2 * new_value + c2,b2)
+    return new_value, l, r
+
+def update_maximum(a1,b1,c1,a2,b2,c2,value):
+    new_value, l1, r1 = update_minimum(-a1, b1, c1, -a2, b2, c2, -value)
+    new_value = -new_value
+    l = div_up(a1 * new_value + c1,b1)
+    r = div_down(a2 * new_value + c2,b2)
+    return new_value, l, r
 
 ineq_count = int(input("input the number of inequalities: "))
 if ineq_count <= 0:
@@ -339,103 +157,57 @@ if obj_a == 0:
         ineq_list[i][0], ineq_list[i][1] = ineq_list[i][1], ineq_list[i][0]
         i += 1
 
-minimum_n_valid = 0
-maximum_n_valid = 0
-s = 1
-while s != 0:
-    s = 0
+# solve the problem without integer restrictions
+i = 0
+while i < ineq_count:
+    if ineq_list[i][1] == 0:
+        if ineq_list[i][0] == 0:
+            if ineq_list[i][2] > 0:
+                no_solution()
+        else:
+            if ineq_list[i][0] > 0:
+                set_minimum(div_up(ineq_list[i][2],ineq_list[i][0]))
+            else:
+                set_maximum(div_down(ineq_list[i][2],ineq_list[i][0]))
+    else:
+        j = 0
+        while j < ineq_count:
+            if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
+                a=ineq_list[i][0] * ineq_list[j][1] - ineq_list[j][0] * ineq_list[i][1]
+                c=ineq_list[i][2] * ineq_list[j][1] - ineq_list[j][2] * ineq_list[i][1]
+                if a == 0:
+                    if c > 0:
+                        no_solution()
+                else:
+                    if a > 0:
+                        set_maximum(div_down(c,a))
+                    else:
+                        set_minimum(div_up(c,a))
+            j += 1
+    i += 1
+# take integer restrictions into consideration
+status = 1
+while status == 1:
+    status = 0
     i = 0
     while i < ineq_count:
-        if ineq_list[i][1] == 0:
-            if ineq_list[i][0] == 0:
-                if ineq_list[i][2] > 0:
-                    print("no solution")
-                    exit()
-            else:
-                if ineq_list[i][0] > 0:
-                    value = div_up(ineq_list[i][2],ineq_list[i][0])
-                    if has_minimum == 0 or minimum < value:
-                        s = 1
-                        has_minimum = 1
-                        minimum_n_valid = 0
-                        minimum = value
-                else:
-                    value = div_down(ineq_list[i][2],ineq_list[i][0])
-                    if has_maximum == 0 or maximum > value:
-                        s = 1
-                        has_maximum = 1
-                        maximum_n_valid = 0
-                        maximum = value
-        else:
-            j = i + 1
-            while j < ineq_count:
-                is_maximum = 0
-                if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
-                    is_maximum, value, l, r = solve_single_group(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2], has_minimum, minimum, has_maximum, maximum)
-                if ineq_list[i][1] < 0 and ineq_list[j][1] > 0:
-                    is_maximum, value, l, r = solve_single_group(-ineq_list[j][0],ineq_list[j][1],ineq_list[j][2],ineq_list[i][0],-ineq_list[i][1],-ineq_list[i][2], has_minimum, minimum, has_maximum, maximum)
-                if is_maximum == 1:
-                    if has_maximum == 0 or maximum > value or (maximum == value and (maximum_n_valid == 0 or maximum_n < l)):
-                        s = 1
-                        has_maximum = 1
-                        maximum = value
-                        maximum_n_valid = 1
-                        maximum_n = l
-                if is_maximum == -1:
-                    if has_minimum == 0 or minimum < value or (minimum == value and (minimum_n_valid == 0 or minimum_n < l)):
-                        s = 1
-                        has_minimum = 1
-                        minimum = value
-                        minimum_n_valid = 1
-                        minimum_n = l
-                j += 1
-            j = i + 1
-            while j < ineq_count:
-                if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
-                    is_maximum, value, l, r = solve_single_group2(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2], has_minimum, minimum, has_maximum, maximum, 1)
-                if ineq_list[i][1] < 0 and ineq_list[j][1] > 0:
-                    is_maximum, value, l, r = solve_single_group2(-ineq_list[j][0],ineq_list[j][1],ineq_list[j][2],ineq_list[i][0],-ineq_list[i][1],-ineq_list[i][2], has_minimum, minimum, has_maximum, maximum, 1)
-                if is_maximum == 1:
-                    if has_maximum == 0 or maximum > value or (maximum == value and (maximum_n_valid == 0 or maximum_n < l)):
-                        s = 1
-                        has_maximum = 1
-                        maximum = value
-                        maximum_n_valid = 1
-                        maximum_n = l
-                if is_maximum == -1:
-                    if has_minimum == 0 or minimum < value or (minimum == value and (minimum_n_valid == 0 or minimum_n < l)):
-                        s = 1
-                        has_minimum = 1
-                        minimum = value
-                        minimum_n_valid = 1
-                        minimum_n = l
-                j += 1
-            j = i + 1
-            while j < ineq_count:
-                if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
-                    is_maximum, value, l, r = solve_single_group2(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2], has_minimum, minimum, has_maximum, maximum, 0)
-                if ineq_list[i][1] < 0 and ineq_list[j][1] > 0:
-                    is_maximum, value, l, r = solve_single_group2(-ineq_list[j][0],ineq_list[j][1],ineq_list[j][2],ineq_list[i][0],-ineq_list[i][1],-ineq_list[i][2], has_minimum, minimum, has_maximum, maximum, 0)
-                if is_maximum == 1:
-                    if has_maximum == 0 or maximum > value or (maximum == value and (maximum_n_valid == 0 or maximum_n < l)):
-                        s = 1
-                        has_maximum = 1
-                        maximum = value
-                        maximum_n_valid = 1
-                        maximum_n = l
-                if is_maximum == -1:
-                    if has_minimum == 0 or minimum < value or (minimum == value and (minimum_n_valid == 0 or minimum_n < l)):
-                        s = 1
-                        has_minimum = 1
-                        minimum = value
-                        minimum_n_valid = 1
-                        minimum_n = l
-                j += 1
+        j = 0
+        while j < ineq_count:
+            if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
+                if has_minimum != 0:
+                    value, l, r = update_minimum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],minimum)
+                    if value != minimum:
+                        status = 1
+                    set_minimum(value)
+                if has_maximum != 0:
+                    value, l, r = update_maximum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],maximum)
+                    if value != maximum:
+                        status = 1
+                    set_maximum(value)
+            j += 1
         i += 1
-    if has_maximum and has_minimum and minimum > maximum:
-        print("no solution")
-        exit()
-if has_maximum and maximum_n_valid == 0:
+
+if has_maximum:
     i = 0
     is_maximum = 0
     maximum_n = 0
@@ -454,7 +226,7 @@ if has_maximum and maximum_n_valid == 0:
                     maximum_n = value
                 is_maximum = 1
         i += 1
-if has_minimum and minimum_n_valid == 0:
+if has_minimum:
     i = 0
     is_maximum = 0
     minimum_n = 0
@@ -487,3 +259,4 @@ if has_minimum:
     print("z_min = "+str(minimum)+" at x = "+str(x_val)+", y = "+str(y_val))
 else:
     print("no minimum")
+
