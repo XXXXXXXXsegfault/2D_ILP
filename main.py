@@ -1,5 +1,6 @@
 def no_solution():
     print("no solution")
+    a=3//0
     exit()
 
 def div_up(a,b):
@@ -176,7 +177,7 @@ while i < ineq_count:
                 a=ineq_list[i][0] * ineq_list[j][1] - ineq_list[j][0] * ineq_list[i][1]
                 c=ineq_list[i][2] * ineq_list[j][1] - ineq_list[j][2] * ineq_list[i][1]
                 if a == 0:
-                    if c > 0:
+                    if c < 0:
                         no_solution()
                 else:
                     if a > 0:
