@@ -206,7 +206,7 @@ while status == 1:
                     set_maximum(value)
                 if has_minimum == 0 and has_maximum == 0:
                     # check if solutions exist
-                    value, l, r = update_minimum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],minimum)
+                    value, l, r = update_minimum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],0)
             j += 1
         i += 1
 
