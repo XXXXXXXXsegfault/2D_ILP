@@ -1,6 +1,5 @@
 def no_solution():
     print("no solution")
-    a=3//0
     exit()
 
 def div_up(a,b):
