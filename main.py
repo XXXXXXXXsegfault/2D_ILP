@@ -50,46 +50,43 @@ def set_maximum(value):
 # b1*n >= a1*m + c1
 # b2*n <= a2*m + c2
 # b1, b2 are positive integers
-# return: new_value, l, r
+# return: new_value
 def update_minimum(a1,b1,c1,a2,b2,c2,value):
+    d1, d2, d3, d4 = 1, 0, 0, 1
     l = div_up(a1 * value + c1,b1)
     r = div_down(a2 * value + c2,b2)
-    if l <= r:
-        return value, l, r
-    if a1 >= 0 and a2 <= 0:
-        no_solution()
-    if a1 <= 0 and a2 >= 0:
-        val1 = div_up(div_down(a1 * value + c1,b1) * b1 - c1,a1)
-        val2 = div_up(div_up(a2 * value + c2,b2) * b2 - c2,a2)
-        new_value = min(val1,val2)
-        l = div_up(a1 * new_value + c1,b1)
-        r = div_down(a2 * new_value + c2,b2)
-        return new_value, l, r
-    if a1 * b2 > a2 * b1:
-        if a1 < 0 or a1 >= b1:
+    while l > r and ((a1 > 0 and a2 > 0) or (a1 < 0 and a2 < 0)):
+        if a1 * b2 > a2 * b1:
             q = div_down(a1,b1)
-            new_value, l1, r1 = update_minimum(a1-q*b1,b1,c1,a2-q*b2,b2,c2, value)
-            l = div_up(a1 * new_value + c1,b1)
-            r = div_down(a2 * new_value + c2,b2)
-            return new_value, l, r
-    else:
-        if a2 < 0 or a2 >= b2:
+        else:
             q = div_down(a2,b2)
-            new_value, l1, r1 = update_minimum(a1-q*b1,b1,c1,a2-q*b2,b2,c2, value)
-            l = div_up(a1 * new_value + c1,b1)
-            r = div_down(a2 * new_value + c2,b2)
-            return new_value, l, r
-    val1, new_value, r1 = update_minimum(b2, a2, -c2, b1, a1, -c1, div_up(a2 * value + c2, b2))
-    l = div_up(a1 * new_value + c1,b1)
-    r = div_down(a2 * new_value + c2,b2)
-    return new_value, l, r
+        if q != 0:
+            a1 -= q * b1
+            a2 -= q * b2
+            d3 -= q * d1
+            d4 -= q * d2
+        else:
+            value = div_up(a2 * value + c2, b2)
+            a1, b1, c1, a2, b2, c2 = b2, a2, -c2, b1, a1, -c1
+            d1, d2, d3, d4 = d3, d4, d1, d2
+        l = div_up(a1 * value + c1,b1)
+        r = div_down(a2 * value + c2,b2)
+    if l > r:
+        if a1 >= 0 and a2 <= 0:
+            no_solution()
+        else:
+            val1 = div_up(div_down(a1 * value + c1,b1) * b1 - c1,a1)
+            val2 = div_up(div_up(a2 * value + c2,b2) * b2 - c2,a2)
+            value = min(val1,val2)
+            l = div_up(a1 * value + c1,b1)
+            r = div_down(a2 * value + c2,b2)
+    val1 = (value * d4 - l * d2) // (d1 * d4 - d2 * d3)
+    val2 = (value * d4 - r * d2) // (d1 * d4 - d2 * d3)
+    return min(val1, val2)
 
 def update_maximum(a1,b1,c1,a2,b2,c2,value):
-    new_value, l1, r1 = update_minimum(-a1, b1, c1, -a2, b2, c2, -value)
-    new_value = -new_value
-    l = div_up(a1 * new_value + c1,b1)
-    r = div_down(a2 * new_value + c2,b2)
-    return new_value, l, r
+    new_value = update_minimum(-a1, b1, c1, -a2, b2, c2, -value)
+    return -new_value
 
 ineq_count = int(input("input the number of inequalities: "))
 if ineq_count <= 0:
@@ -195,18 +192,18 @@ while status == 1:
         while j < ineq_count:
             if ineq_list[i][1] > 0 and ineq_list[j][1] < 0:
                 if has_minimum != 0:
-                    value, l, r = update_minimum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],minimum)
+                    value = update_minimum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],minimum)
                     if value != minimum:
                         status = 1
                     set_minimum(value)
                 if has_maximum != 0:
-                    value, l, r = update_maximum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],maximum)
+                    value = update_maximum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],maximum)
                     if value != maximum:
                         status = 1
                     set_maximum(value)
                 if has_minimum == 0 and has_maximum == 0:
                     # check if solutions exist
-                    value, l, r = update_minimum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],0)
+                    value = update_minimum(-ineq_list[i][0],ineq_list[i][1],ineq_list[i][2],ineq_list[j][0],-ineq_list[j][1],-ineq_list[j][2],0)
             j += 1
         i += 1
 
