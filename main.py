@@ -75,9 +75,15 @@ def update_minimum(a1,b1,c1,a2,b2,c2,value):
         if a1 >= 0 and a2 <= 0:
             no_solution()
         else:
-            val1 = div_up(div_down(a1 * value + c1,b1) * b1 - c1,a1)
-            val2 = div_up(div_up(a2 * value + c2,b2) * b2 - c2,a2)
-            value = min(val1,val2)
+            if a1 == 0:
+                value = div_up(div_up(a2 * value + c2,b2) * b2 - c2,a2)
+            else:
+                if a2 == 0:
+                    value = div_up(div_down(a1 * value + c1,b1) * b1 - c1,a1)
+                else:
+                    val1 = div_up(div_down(a1 * value + c1,b1) * b1 - c1,a1)
+                    val2 = div_up(div_up(a2 * value + c2,b2) * b2 - c2,a2)
+                    value = min(val1,val2)
             l = div_up(a1 * value + c1,b1)
             r = div_down(a2 * value + c2,b2)
     val1 = (value * d4 - l * d2) // (d1 * d4 - d2 * d3)
